@@ -91,7 +91,7 @@ const StickySearchBar = ({ scrollProgress }: { scrollProgress: number }) => {
 // --- Sticky Purchase CTA Button ---
 
 const StickyPurchaseCTA = () => (
-  <button className="fixed bottom-[136px] left-4 right-4 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-half h-14 shadow-xl transition-all active:scale-[0.97] flex items-center justify-center text-base font-bold z-30">
+  <button className="fixed bottom-[41px] left-4 right-4 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-half h-14 shadow-xl transition-all active:scale-[0.97] flex items-center justify-center text-base font-bold z-30">
     Unlock All for ₹499
   </button>
 );
@@ -354,6 +354,15 @@ const PageHeader = ({ title, onBack, showNavbar = false }: { title: string; onBa
 // --- Branch Resumes Page ---
 
 const BranchResumesPage = ({ branch, resumes, onBack, showNavbar }: { branch: Branch; resumes: ResumeTemplate[]; onBack: () => void; showNavbar: boolean }) => {
+  // Search state
+  const [searchQuery, setSearchQuery] = useState('');
+  
+  // Filter resumes based on search query
+  const filteredResumes = resumes.filter(r =>
+    r.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    r.id.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+  
   // When navbar is hidden, reduce top padding since header is at top-0
   const contentPaddingTop = showNavbar ? 'pt-20' : 'pt-6';
   
@@ -363,11 +372,38 @@ const BranchResumesPage = ({ branch, resumes, onBack, showNavbar }: { branch: Br
 
       {/* Content container with adaptive padding based on navbar visibility */}
       <div className={`${contentPaddingTop} px-6`}>
-        <div className="grid grid-cols-4 gap-3">
-          {resumes.map((r) => (
-            <ResumeCard key={r.id} template={r} onClick={() => {}} />
-          ))}
+        {/* Search Bar */}
+        <div className="mb-4">
+          <div className="relative">
+            <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none">
+              <SearchIcon className="w-5 h-5 text-slate-400" />
+            </div>
+            <input 
+              type="text" 
+              placeholder="Search resume domain..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full bg-slate-50 border border-slate-200 rounded-xl py-3 pl-12 pr-4 shadow-sm focus:ring-2 focus:ring-slate-900 focus:border-transparent outline-none placeholder:text-slate-400 font-medium text-slate-800 transition-all"
+            />
+          </div>
         </div>
+
+        {/* Resume Grid */}
+        {filteredResumes.length > 0 ? (
+          <div className="grid grid-cols-4 gap-3">
+            {filteredResumes.map((r) => (
+              <ResumeCard key={r.id} template={r} onClick={() => {}} />
+            ))}
+          </div>
+        ) : (
+          <div className="flex flex-col items-center justify-center py-16">
+            <div className="text-slate-400 text-center">
+              <SearchIcon className="w-12 h-12 mx-auto mb-4 opacity-50" />
+              <p className="text-base font-medium">No resumes found for this search.</p>
+              <p className="text-sm mt-2">Try different keywords</p>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
@@ -477,53 +513,6 @@ const App: React.FC = () => {
 
       {/* Sticky Purchase CTA */}
       <StickyPurchaseCTA />
-
-      {/* Persistent Bottom Nav */}
-      <nav className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-md bg-white border-t border-slate-100 flex justify-between px-6 pt-3 pb-5 z-40">
-        <button 
-          onClick={() => { setActiveTab(AppTab.HOME); setSelectedResume(null); setSelectedBranch(null); }}
-          className={`flex flex-col items-center gap-1 group ${activeTab === AppTab.HOME ? 'text-slate-900' : 'text-slate-400'}`}
-        >
-          <div className={`transition-all ${activeTab === AppTab.HOME ? 'scale-105' : ''}`}>
-             <HomeIcon className="w-6 h-6" />
-          </div>
-          <span className="text-[10px] font-black uppercase tracking-tighter">HOME</span>
-          {activeTab === AppTab.HOME && <div className="h-[2px] w-full bg-slate-900 mt-1"></div>}
-        </button>
-
-        <button 
-          onClick={() => setActiveTab(AppTab.RESUMES)}
-          className={`flex flex-col items-center gap-1 group ${activeTab === AppTab.RESUMES ? 'text-slate-900' : 'text-slate-400'}`}
-        >
-          <div className={`transition-all ${activeTab === AppTab.RESUMES ? 'scale-105' : ''}`}>
-             <ResumesIcon className="w-6 h-6" />
-          </div>
-          <span className="text-[10px] font-black uppercase tracking-tighter">RESUMES</span>
-          {activeTab === AppTab.RESUMES && <div className="h-[2px] w-full bg-slate-900 mt-1"></div>}
-        </button>
-
-        <button 
-          onClick={() => setActiveTab(AppTab.PROJECTS)}
-          className={`flex flex-col items-center gap-1 group ${activeTab === AppTab.PROJECTS ? 'text-slate-900' : 'text-slate-400'}`}
-        >
-          <div className={`transition-all ${activeTab === AppTab.PROJECTS ? 'scale-105' : ''}`}>
-             <ProjectsIcon className="w-6 h-6" />
-          </div>
-          <span className="text-[10px] font-black uppercase tracking-tighter">PROJECTS</span>
-          {activeTab === AppTab.PROJECTS && <div className="h-[2px] w-full bg-slate-900 mt-1"></div>}
-        </button>
-
-        <button 
-          onClick={() => setActiveTab(AppTab.JOBS)}
-          className={`flex flex-col items-center gap-1 group ${activeTab === AppTab.JOBS ? 'text-slate-900' : 'text-slate-400'}`}
-        >
-          <div className={`transition-all ${activeTab === AppTab.JOBS ? 'scale-105' : ''}`}>
-             <JobsIcon className="w-6 h-6" />
-          </div>
-          <span className="text-[10px] font-black uppercase tracking-tighter">JOBS</span>
-          {activeTab === AppTab.JOBS && <div className="h-[2px] w-full bg-slate-900 mt-1"></div>}
-        </button>
-      </nav>
     </div>
   );
 };
